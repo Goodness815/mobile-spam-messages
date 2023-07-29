@@ -1,0 +1,53 @@
+name: messages
+description: A new Flutter project.
+publish_to: none
+version: 1.0.0+1
+environment:
+  sdk: '>=2.18.2 <3.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  google_fonts: ^3.0.1
+  flutter_native_splash: ^2.2.16
+  flutter_svg: ^1.1.5
+  permission_handler: ^10.2.0
+  telephony: ^0.2.0
+  intl: ^0.18.0
+  flutter_tflite: ^1.0.1
+dev_dependencies:
+  flutter_launcher_icons: ^0.11.0
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+flutter_icons:
+  android: true
+  ios: true
+  image_path: images/splash-logo.png
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: images/splash-logo.png
+    background_color: '#D9D9D9'
+    theme_color: '#D9D9D9'
+  windows:
+    generate: true
+    image_path: images/splash-logo.png
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: images/splash-logo.png
+flutter_native_splash:
+  color: '#D9D9D9'
+  color_dark: '#D9D9D9'
+  image: images/splash-logo.png
+  image_dark: images/splash-logo.png
+  android_12:
+    icon_background_color: '#D9D9D9'
+    icon_background_color_dark: '#D9D9D9'
+    image: images/splash-logo.png
+    image_dark: images/splash-logo.png
+flutter:
+  uses-material-design: true
+  assets:
+  - images/
