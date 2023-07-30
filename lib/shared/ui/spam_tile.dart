@@ -2,20 +2,33 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:messages/shared/constants/app_colors.dart';
 import 'package:messages/shared/constants/app_icon.dart';
 import 'package:messages/shared/themes/text_theme.dart';
 
-class SpamTile extends StatelessWidget {
+class SpamTile extends StatefulWidget {
   String fullname;
   String description;
-  String date;
+  int? date;
   SpamTile({
     super.key,
     required this.fullname,
     required this.description,
     required this.date,
   });
+
+  @override
+  State<SpamTile> createState() => _SpamTileState();
+}
+
+class _SpamTileState extends State<SpamTile> {
+  formatDate() {
+    int? timestamp = widget.date;
+    DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp!);
+    String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+    return formattedDate;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +65,9 @@ class SpamTile extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        fullname.isNotEmpty ? fullname[0].toUpperCase() : '',
+                        widget.fullname.isNotEmpty
+                            ? widget.fullname[0].toUpperCase()
+                            : '',
                         style: TextThemes(context).getTextStyle(
                           fontSize: 20,
                           color: AppColors.primaryColor,
@@ -69,7 +84,7 @@ class SpamTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          fullname,
+                          widget.fullname,
                           overflow: TextOverflow.ellipsis,
                           style: TextThemes(context).getTextStyle(
                             color: AppColors.primaryTextColor,
@@ -81,7 +96,7 @@ class SpamTile extends StatelessWidget {
                           height: 15,
                         ),
                         Text(
-                          description,
+                          widget.description,
                           overflow: TextOverflow.ellipsis,
                           style: TextThemes(context).getTextStyle(
                             color: AppColors.secondaryTextColor,
@@ -106,7 +121,7 @@ class SpamTile extends StatelessWidget {
                   height: 15,
                 ),
                 Text(
-                  date,
+                  '${formatDate()}',
                   style: TextThemes(context).getTextStyle(
                     color: AppColors.secondaryTextColor,
                     fontWeight: FontWeight.w400,

@@ -34,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
     _timer.cancel();
     super.dispose();
   }
