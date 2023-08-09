@@ -17,16 +17,35 @@ class SpamScreen extends StatefulWidget {
 }
 
 class _SpamScreenState extends State<SpamScreen> {
-  var dummyData = DummyData().messages;
   List<SmsMessage> allMessages = [];
   final Telephony telephony = Telephony.instance;
+  Map<String, List<SmsMessage>> spamMessageThreads = {};
+  bool isLoading = false;
 
   Future<void> _getMessages() async {
+    setState(() {
+      isLoading = true;
+    });
     bool? permissionsGranted = await telephony.requestPhoneAndSmsPermissions;
     List<SmsMessage> messages = await telephony.getInboxSms();
     setState(() {
       allMessages = messages;
+      _groupSpamMessagesIntoThreads();
     });
+  }
+
+  void _groupSpamMessagesIntoThreads() {
+    spamMessageThreads.clear();
+    for (SmsMessage message in allMessages) {
+      if (isSpamMessage(message)) {
+        String sender = '${message.address}';
+        if (spamMessageThreads.containsKey(sender)) {
+          spamMessageThreads[sender]!.add(message);
+        } else {
+          spamMessageThreads[sender] = [message];
+        }
+      }
+    }
   }
 
   bool isSpamMessage(SmsMessage message) {
@@ -41,7 +60,7 @@ class _SpamScreenState extends State<SpamScreen> {
     }
 
     // Criteria 2: Check for suspicious URLs
-    if (body.contains('http://') || body.contains('https://')) {
+    if (body.contains('http://')) {
       return true;
     }
 
@@ -60,11 +79,14 @@ class _SpamScreenState extends State<SpamScreen> {
     }
 
     // Criteria 5: Check for messages with short length (common in spam)
-    if (body.length < 20) {
+    if (body.length < 10) {
       return true;
     }
 
     // If none of the above criteria match, consider it not a spam message
+    setState(() {
+      isLoading = false;
+    });
     return false;
   }
 
@@ -83,15 +105,11 @@ class _SpamScreenState extends State<SpamScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: 50,
-                  ),
+                  SizedBox(height: 50),
                   Text(
                     'Spam Messages',
                     style: TextThemes(context).getTextStyle(
@@ -103,41 +121,75 @@ class _SpamScreenState extends State<SpamScreen> {
                 ],
               ),
             ),
-            SizedBox(
-              height: 10,
-            ),
+            SizedBox(height: 10),
             Expanded(
-              child: ListView.builder(
-                itemCount: allMessages.where(isSpamMessage).length,
-                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                scrollDirection: Axis.vertical,
-                itemBuilder: (context, index) {
-                  // Get only spam messages
-                  List<SmsMessage> spamMessages =
-                      allMessages.where(isSpamMessage).toList();
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: InkWell(
-                      onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => MessageDetails(
-                        //       data: spamMessages[index],
-                        //     ),
-                        //   ),
-                        // );
-                      },
-                      child: SpamTile(
-                        fullname: "${spamMessages[index].address}",
-                        description: "${spamMessages[index].body}",
-                        date: spamMessages[index].date,
+              child: isLoading == true
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            "Loading Possible Spam Messages",
+                            style: TextThemes(context).getTextStyle(
+                              color: AppColors.primaryTextColor,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  );
-                },
-              ),
+                    )
+                  : spamMessageThreads.isEmpty
+                      ? Center(
+                          child: Text("No spam messages."),
+                        )
+                      : ListView.builder(
+                          itemCount: spamMessageThreads.length,
+                          padding: EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 20),
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (context, index) {
+                            String sender =
+                                spamMessageThreads.keys.toList()[index];
+                            List<SmsMessage> messages =
+                                spamMessageThreads[sender]!;
+                            SmsMessage latestMessage = messages.last;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => MessageDetails(
+                                        messages: messages,
+                                        fullName: sender,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: SpamTile(
+                                  fullname: sender,
+                                  description: "${latestMessage.body}",
+                                  date: latestMessage.date,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
             ),
           ],
         ),

@@ -31,7 +31,7 @@ class _BaseBottomNavigationState extends State<BaseBottomNavigation> {
 
   final List<Widget> _pages = [
     MessagesScreen(),
-    StarredScreen(),
+    // StarredScreen(),
     SpamScreen(),
     settingsScreen(),
   ];
@@ -61,23 +61,23 @@ class _BaseBottomNavigationState extends State<BaseBottomNavigation> {
             _selectedIndex,
             0,
           ),
-          _bottomNavItem(
-            AppIcons.starred,
-            AppStrings.starred,
-            _selectedIndex,
-            1,
-          ),
+          // _bottomNavItem(
+          //   AppIcons.starred,
+          //   AppStrings.starred,
+          //   _selectedIndex,
+          //   1,
+          // ),
           _bottomNavItem(
             AppIcons.spam,
             AppStrings.spam,
             _selectedIndex,
-            2,
+            1,
           ),
           _bottomNavItem(
             AppIcons.settings,
             AppStrings.settings,
             _selectedIndex,
-            3,
+            2,
           ),
         ],
       ),
